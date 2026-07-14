@@ -1,7 +1,8 @@
+if game.PlaceId == 84726337419858 then
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Rusty Plane Automation Script",
+   Name = "Rusty Plane Automation Script (Made By RyGuy)",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
    LoadingTitle = "Rayfield Interface Suite",
    LoadingSubtitle = "by RyGuy",
@@ -39,7 +40,7 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local MainTab = Window:CreateTab("Home", nil) -- Title, Image
+local MainTab = Window:CreateTab("Home🏠", nil) -- Title, Image
 local Section = MainTab:CreateSection("Main")
 
 local Button = MainTab:CreateButton({
@@ -69,5 +70,29 @@ if _G.infinJumpStarted == nil then
         end
     end)
 end
+   end,
+})
+
+local Slider = MainTab:CreateSlider({
+   Name = "Walkspeed",
+   Range = {0, 200},
+   Increment = 1,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file; make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = (Value)
+   end,
+})
+
+local Dropdown = MainTab:CreateDropdown({
+   Name = "Teleport",
+   Options = {"Cockpit", "Back Of Plane"},
+   CurrentOption = {"Option 1"},
+   MultipleOptions = false,
+   Flag = "Dropdown1", -- A flag is the identifier for the configuration file; make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Options)
+   -- The function that takes place when the selected option is changed
+   -- The variable (Options) is a table of strings for the current selected options
    end,
 })

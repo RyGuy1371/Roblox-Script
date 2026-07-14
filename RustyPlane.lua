@@ -3,73 +3,92 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "Rusty Plane Automation Script (Made By RyGuy)",
-   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   Icon = 0,
    LoadingTitle = "Rayfield Interface Suite",
    LoadingSubtitle = "by RyGuy",
-   ShowText = "Rayfield", -- for mobile users to unhide Rayfield, change if you'd like
-   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
-
-   ToggleUIKeybind = "K", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
-
+   ShowText = "Rayfield",
+   Theme = "Default",
+   ToggleUIKeybind = "K",
    DisableRayfieldPrompts = false,
-   DisableBuildWarnings = false, -- Prevents Rayfield from emitting warnings when the script has a version mismatch with the interface.
-
-   -- ScriptID = "sid_xxxxxxxxxxxx", -- Your Script ID from developer.sirius.menu — enables analytics, managed keys, and script hosting
-
+   DisableBuildWarnings = false,
    ConfigurationSaving = {
       Enabled = false,
-      FolderName = nil, -- Create a custom folder for your hub/game
+      FolderName = nil,
       FileName = "RyGuy Hub"
    },
-
    Discord = {
-      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
-      Invite = "noinvitelink", -- The Discord invite code, do not include Discord.gg/. E.g. Discord.gg/ABCD would be ABCD
-      RememberJoins = true -- Set this to false to make them join the Discord every time they load it up
+      Enabled = false,
+      Invite = "noinvitelink",
+      RememberJoins = true
    },
-
-   KeySystem = false, -- Set this to true to use our key system
+   KeySystem = false,
    KeySettings = {
       Title = "Untitled",
       Subtitle = "Key System",
-      Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
-      FileName = "Key", -- It is recommended to use something unique, as other scripts using Rayfield may overwrite your key file
-      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
-      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
-      Key = {"Hello"} -- List of keys that the system will accept, can be RAW file links (pastebin, github, etc.) or simple strings ("hello", "key22")
+      Note = "No method of obtaining the key is provided",
+      FileName = "Key",
+      SaveKey = true,
+      GrabKeyFromSite = false,
+      Key = {"Hello"}
    }
 })
 
-local MainTab = Window:CreateTab("Home🏠", nil) -- Title, Image
+local MainTab = Window:CreateTab("Home🏠", nil)
 local Section = MainTab:CreateSection("Main")
+
+-- Teleport helper: finds a part by name in workspace recursively
+local function findPart(name)
+   for _, v in ipairs(workspace:GetDescendants()) do
+      if v.Name == name and v:IsA("BasePart") then
+         return v
+      end
+   end
+   return nil
+end
+
+local function teleportTo(part)
+   local player = game.Players.LocalPlayer
+   local character = player.Character or player.CharacterAdded:Wait()
+   local rootPart = character:FindFirstChild("HumanoidRootPart")
+   if rootPart and part then
+      -- Offset slightly above the target part so we don't clip into it
+      rootPart.CFrame = part.CFrame * CFrame.new(0, 3, 0)
+   else
+      game.StarterGui:SetCore("SendNotification", {
+         Title = "Teleport Failed";
+         Text = "Could not find target. Check part name.";
+         Duration = 4;
+      })
+   end
+end
 
 local Button = MainTab:CreateButton({
    Name = "Infinite Jump",
    Callback = function()
-   --Toggles the infinite jump between on or off on every script run
-_G.infinjump = not _G.infinjump
+      _G.infinjump = not _G.infinjump
 
-if _G.infinJumpStarted == nil then
-    --Ensures this only runs once to save resources
-    _G.infinJumpStarted = true
+      if _G.infinJumpStarted == nil then
+         _G.infinJumpStarted = true
 
-    --Notifies readiness
-    game.StarterGui:SetCore("SendNotification", {Title="Youtube Hub"; Text="Infinite Jump Activated!"; Duration=5;})
+         game.StarterGui:SetCore("SendNotification", {
+            Title = "RyGuy Hub";
+            Text = "Infinite Jump Activated!";
+            Duration = 5;
+         })
 
-    --The actual Infinite Jump
-    local plr = game:GetService('Players').LocalPlayer
-    local m = plr:GetMouse()
-    m.KeyDown:connect(function(k)
-        if _G.infinjump then
-            if k:byte() == 32 then
-                humanoid = game:GetService('Players').LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
-                humanoid:ChangeState('Jumping')
-                wait()
-                humanoid:ChangeState('Seated')
+         local plr = game:GetService('Players').LocalPlayer
+         local m = plr:GetMouse()
+         m.KeyDown:connect(function(k)
+            if _G.infinjump then
+               if k:byte() == 32 then
+                  local humanoid = game:GetService('Players').LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+                  humanoid:ChangeState('Jumping')
+                  wait()
+                  humanoid:ChangeState('Seated')
+               end
             end
-        end
-    end)
-end
+         end)
+      end
    end,
 })
 
@@ -79,20 +98,45 @@ local Slider = MainTab:CreateSlider({
    Increment = 1,
    Suffix = "Speed",
    CurrentValue = 16,
-   Flag = "Slider1", -- A flag is the identifier for the configuration file; make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Flag = "Slider1",
    Callback = function(Value)
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = (Value)
+      game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
    end,
 })
+
+-- PART NAMES — change these if the actual part names in the game differ
+-- Use a workspace explorer (e.g. Ctrl+Shift+F in your executor) to confirm exact names
+local COCKPIT_PART_NAME = "Cockpit"       -- adjust to actual cockpit seat/part name
+local BACK_PART_NAME    = "BackOfPlane"   -- adjust to actual back-of-plane part name
 
 local Dropdown = MainTab:CreateDropdown({
    Name = "Teleport",
    Options = {"Cockpit", "Back Of Plane"},
-   CurrentOption = {"Option 1"},
+   CurrentOption = {"Cockpit"},
    MultipleOptions = false,
-   Flag = "Dropdown1", -- A flag is the identifier for the configuration file; make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Flag = "Dropdown1",
    Callback = function(Options)
-   -- The function that takes place when the selected option is changed
-   -- The variable (Options) is a table of strings for the current selected options
+      local selection = Options[1]
+
+      if selection == "Cockpit" then
+         local part = findPart(COCKPIT_PART_NAME)
+         teleportTo(part)
+         game.StarterGui:SetCore("SendNotification", {
+            Title = "Teleport";
+            Text = "Teleported to Cockpit.";
+            Duration = 3;
+         })
+
+      elseif selection == "Back Of Plane" then
+         local part = findPart(BACK_PART_NAME)
+         teleportTo(part)
+         game.StarterGui:SetCore("SendNotification", {
+            Title = "Teleport";
+            Text = "Teleported to Back of Plane.";
+            Duration = 3;
+         })
+      end
    end,
 })
+
+end
